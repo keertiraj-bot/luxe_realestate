@@ -232,23 +232,36 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
 
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         {error && <p className="text-red-500 text-xs font-bold">{error}</p>}
-                                        <div>
-                                            <input name="name" required type="text" placeholder="Your Name" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
+                                        <div className="grid grid-cols-1 gap-4">
+                                            <input name="name" required type="text" placeholder="Full Name" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold" />
+                                            <input name="phone" required type="tel" placeholder="Phone Number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold" />
+
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <label className="cursor-pointer">
+                                                    <input type="radio" name="service" value="callback" defaultChecked className="hidden peer" />
+                                                    <div className="py-3 text-center rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 peer-checked:bg-accent peer-checked:text-white peer-checked:border-accent transition-all font-bold text-xs uppercase tracking-widest">
+                                                        Callback
+                                                    </div>
+                                                </label>
+                                                <label className="cursor-pointer">
+                                                    <input type="radio" name="service" value="sitevisit" className="hidden peer" />
+                                                    <div className="py-3 text-center rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 peer-checked:bg-accent peer-checked:text-white peer-checked:border-accent transition-all font-bold text-xs uppercase tracking-widest">
+                                                        Site Visit
+                                                    </div>
+                                                </label>
+                                            </div>
+
+                                            <textarea name="message" required rows={3} placeholder="Specific requirements or questions..." className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all resize-none font-bold"></textarea>
                                         </div>
-                                        <div>
-                                            <input name="phone" required type="tel" placeholder="Phone Number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
-                                        </div>
-                                        <div>
-                                            <textarea name="message" required rows={4} placeholder="Your Message" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all resize-none"></textarea>
-                                        </div>
+
                                         <button
                                             disabled={loading}
                                             type="submit"
-                                            className="w-full py-5 bg-primary text-white rounded-2xl font-bold shadow-xl hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-5 bg-accent text-white rounded-[2rem] font-black shadow-xl shadow-accent/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                                         >
-                                            {loading ? <Loader2 className="animate-spin" /> : null}
-                                            {loading ? "Submitting..." : "Submit Enquiry"}
+                                            {loading ? <Loader2 className="animate-spin" /> : "Request Details"}
                                         </button>
+                                        <p className="text-center text-[9px] font-black text-slate-400 uppercase tracking-widest">Direct access to relationship manager</p>
                                     </form>
                                 </div>
                             </div>

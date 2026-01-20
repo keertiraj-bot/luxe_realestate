@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -68,6 +68,18 @@ export default function Home() {
         });
     }, []);
 
+    const [selectedLocation, setSelectedLocation] = useState("Mumbai");
+    const [selectedBudget, setSelectedBudget] = useState("Any");
+    const [selectedType, setSelectedType] = useState("Any");
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (selectedLocation !== "Any") params.set("location", selectedLocation);
+        if (selectedType !== "Any") params.set("type", selectedType);
+        // Budget logic would need mapping but for now we navigate
+        window.location.href = `/properties?${params.toString()}`;
+    };
+
     return (
         <div className="overflow-hidden">
             {/* Hero Section */}
@@ -127,38 +139,55 @@ export default function Home() {
 
                                 <div className="px-6 py-2 group cursor-pointer">
                                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-1 group-hover:translate-x-1 transition-transform">Location</label>
-                                    <select className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer">
-                                        <option>Mumbai, Maharashtra</option>
-                                        <option>Bangalore, KA</option>
-                                        <option>Pune, MH</option>
-                                        <option>Goa</option>
+                                    <select
+                                        value={selectedLocation}
+                                        onChange={(e) => setSelectedLocation(e.target.value)}
+                                        className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer"
+                                    >
+                                        <option value="Any">All India</option>
+                                        <option value="Mumbai">Mumbai</option>
+                                        <option value="Bangalore">Bangalore</option>
+                                        <option value="Pune">Pune</option>
+                                        <option value="Goa">Goa</option>
                                     </select>
                                 </div>
 
                                 <div className="px-6 py-2 group cursor-pointer">
                                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-1 group-hover:translate-x-1 transition-transform">Budget Range</label>
-                                    <select className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer">
-                                        <option>₹1Cr - ₹5Cr</option>
-                                        <option>₹5Cr - ₹10Cr</option>
-                                        <option>₹10Cr - ₹50Cr</option>
-                                        <option>Unlimited Luxury</option>
+                                    <select
+                                        value={selectedBudget}
+                                        onChange={(e) => setSelectedBudget(e.target.value)}
+                                        className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer"
+                                    >
+                                        <option value="Any">Select Budget</option>
+                                        <option value="1Cr-5Cr">₹1Cr - ₹5Cr</option>
+                                        <option value="5Cr-10Cr">₹5Cr - ₹10Cr</option>
+                                        <option value="10Cr+">₹10Cr+</option>
                                     </select>
                                 </div>
 
                                 <div className="px-6 py-2 group cursor-pointer">
                                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-1 group-hover:translate-x-1 transition-transform">Property Type</label>
-                                    <select className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer">
-                                        <option>Luxury Villa</option>
-                                        <option>High-end Flat</option>
-                                        <option>Private Plot</option>
-                                        <option>Penthouse</option>
+                                    <select
+                                        value={selectedType}
+                                        onChange={(e) => setSelectedType(e.target.value)}
+                                        className="w-full bg-transparent border-none outline-none text-lg font-black text-slate-900 dark:text-white appearance-none cursor-pointer"
+                                    >
+                                        <option value="Any">All Types</option>
+                                        <option value="Villa">Luxury Villa</option>
+                                        <option value="Flat">High-end Flat</option>
+                                        <option value="Plot">Private Plot</option>
+                                        <option value="Penthouse">Penthouse</option>
                                     </select>
                                 </div>
 
                             </div>
 
-                            <button className="w-full md:w-auto px-10 py-6 bg-accent text-white rounded-[2rem] md:rounded-full font-black text-xl shadow-2xl shadow-accent/40 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3">
-                                Find Properties <ArrowRight size={24} />
+                            <button
+                                onClick={handleSearch}
+                                className="w-full md:w-auto px-12 py-6 bg-accent text-white rounded-[2rem] md:rounded-full font-black text-xl shadow-2xl shadow-accent/40 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3 group"
+                            >
+                                Find Properties <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
                             </button>
                         </div>
 

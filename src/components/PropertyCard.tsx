@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Maximize, MessageCircle, Bed, Bath, Star, Zap, CheckCircle2 } from "lucide-react";
+import { MapPin, Maximize, MessageCircle, Bed, Bath, Star, Zap, Heart, ArrowRight } from "lucide-react";
 import { formatPrice, getWhatsAppLink } from "@/lib/utils";
+import { useWishlist } from "@/components/WishlistContext";
 
 interface PropertyCardProps {
     property: {
@@ -25,6 +26,8 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property }: PropertyCardProps) {
     const whatsappLink = getWhatsAppLink(property.title, property.location, formatPrice(property.price));
+    const { toggleWishlist, isInWishlist } = useWishlist();
+    const isSaved = isInWishlist(property.id);
 
     return (
         <motion.div
@@ -63,6 +66,14 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                         {property.status || "Ready to Move"}
                     </span>
                 </div>
+
+                {/* Wishlist Button On Image */}
+                <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(property.id); }}
+                    className={`absolute top-6 right-6 p-4 rounded-2xl backdrop-blur-md transition-all z-20 shadow-xl ${isSaved ? "bg-red-500 text-white scale-110" : "bg-white/20 text-white hover:bg-white/40"}`}
+                >
+                    <Heart size={20} fill={isSaved ? "currentColor" : "none"} />
+                </button>
             </Link>
 
             {/* Content Section */}
@@ -118,7 +129,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                             href={`/properties/${property.id}`}
                             className="p-4 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
                         >
-                            <CheckCircle2 size={24} />
+                            <ArrowRight size={24} />
                         </Link>
                         <a
                             href={whatsappLink}
