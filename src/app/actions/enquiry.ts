@@ -3,6 +3,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { supabase as staticSupabase } from "@/lib/supabase";
 
 function getSupabaseClient() {
     const cookieStore = cookies();
@@ -32,17 +33,13 @@ function getSupabaseClient() {
 
 export async function submitEnquiry(formData: FormData) {
     try {
-        const supabase = getSupabaseClient();
-
         const property_id = formData.get("property_id") as string;
         const name = formData.get("name") as string;
         const phone = formData.get("phone") as string;
         const message = formData.get("message") as string;
 
-        // Log the data we are trying to insert
-        console.log("Submitting enquiry:", { property_id, name, phone, message });
-
-        const { error } = await supabase.from("buyer_enquiries").insert([
+        // Simplified insertion using static client
+        const { error } = await staticSupabase.from("buyer_enquiries").insert([
             {
                 property_id: (property_id && property_id !== "undefined") ? property_id : null,
                 name,
@@ -52,22 +49,14 @@ export async function submitEnquiry(formData: FormData) {
         ]);
 
         if (error) {
-            console.error("Enquiry Insertion Error:", error);
+            console.error("Supabase Error:", error);
             return { success: false, error: error.message };
-        }
-
-        console.log("Enquiry submitted successfully");
-
-        try {
-            revalidatePath("/admin/dashboard");
-        } catch (revalidateError) {
-            console.error("Revalidation Error (non-critical):", revalidateError);
         }
 
         return { success: true };
     } catch (err: any) {
-        console.error("Unexpected Enquiry Error:", err);
-        return { success: false, error: err.message || "Something went wrong on the server." };
+        console.error("Critical Enquiry Error:", err);
+        return { success: false, error: "Submission failed. Please try again or call us." };
     }
 }
 
