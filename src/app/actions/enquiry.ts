@@ -1,17 +1,37 @@
 "use server";
 
-import { createClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-export async function submitEnquiry(formData: FormData) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getSupabaseClient() {
+    const cookieStore = cookies();
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            cookieStore.set(name, value, options)
+                        )
+                    } catch {
+                        // The `setAll` method was called from a Server Component.
+                        // This can be ignored if you have middleware refreshing
+                        // user sessions.
+                    }
+                },
+            },
+        }
+    );
+}
 
-    // Public action, no auth required usually (or basic rate limiting)
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-        cookies: { getAll: () => [] }
-    });
+export async function submitEnquiry(formData: FormData) {
+    const supabase = getSupabaseClient();
 
     const property_id = formData.get("property_id") as string;
     const name = formData.get("name") as string;
@@ -31,12 +51,7 @@ export async function submitEnquiry(formData: FormData) {
 }
 
 export async function getEnquiries() {
-    const cookieStore = cookies();
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { getAll: () => cookieStore.getAll() } }
-    );
+    const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
         .from("buyer_enquiries")

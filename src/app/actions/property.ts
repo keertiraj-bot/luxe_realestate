@@ -1,16 +1,37 @@
 "use server";
 
-import { createClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-export async function createProperty(formData: FormData) {
+function getSupabaseClient() {
     const cookieStore = cookies();
-    const supabase = createClient(
+    return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { getAll: () => cookieStore.getAll() } }
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            cookieStore.set(name, value, options)
+                        )
+                    } catch {
+                        // The `setAll` method was called from a Server Component.
+                        // This can be ignored if you have middleware refreshing
+                        // user sessions.
+                    }
+                },
+            },
+        }
     );
+}
+
+export async function createProperty(formData: FormData) {
+    const supabase = getSupabaseClient();
 
     const title = formData.get("title") as string;
     const price = Number(formData.get("price"));
@@ -35,12 +56,7 @@ export async function createProperty(formData: FormData) {
 }
 
 export async function deleteProperty(id: string) {
-    const cookieStore = cookies();
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { cookies: { getAll: () => cookieStore.getAll() } }
-    );
+    const supabase = getSupabaseClient();
 
     const { error } = await supabase.from("properties").delete().eq("id", id);
     if (error) throw error;
