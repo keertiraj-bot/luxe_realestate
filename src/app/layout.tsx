@@ -1,32 +1,31 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-    title: "Luxe Realty | Premium Properties for Buyers",
-    description: "Find your dream home with Luxe Realty. Verified properties in the best locations with direct WhatsApp support.",
-    keywords: "real estate, buy home, luxury flats, property search, WhatsApp real estate",
-};
 
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const pathname = usePathname();
+    const isAdminPage = pathname.startsWith("/admin");
+
     return (
         <html lang="en">
             <body className={inter.className}>
-                <Navbar />
+                {!isAdminPage && <Navbar />}
                 <main className="min-h-screen">
                     {children}
                 </main>
-                <Footer />
-                <FloatingWhatsApp />
+                {!isAdminPage && <Footer />}
+                {!isAdminPage && <FloatingWhatsApp />}
             </body>
         </html>
     );

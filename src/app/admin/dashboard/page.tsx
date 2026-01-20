@@ -41,6 +41,8 @@ export default function AdminDashboard() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
 
+    const [error, setError] = useState<string | null>(null);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -55,6 +57,7 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         setFetching(true);
+        setError(null);
         try {
             const [propData, enqData] = await Promise.all([
                 getProperties(),
@@ -62,8 +65,9 @@ export default function AdminDashboard() {
             ]);
             setProperties(propData || []);
             setEnquiries(enqData || []);
-        } catch (error) {
-            console.error("Fetch Data Error:", error);
+        } catch (err: any) {
+            console.error("Fetch Data Error:", err);
+            setError("Database connection error. Check Supabase keys.");
         } finally {
             setFetching(false);
         }
@@ -187,6 +191,13 @@ export default function AdminDashboard() {
                 </header>
 
                 <AnimatePresence mode="wait">
+                    {error && (
+                        <div className="mb-8 p-6 bg-red-50 text-red-600 rounded-[2rem] border border-red-100 font-bold flex items-center gap-4">
+                            <X className="bg-red-600 text-white rounded-full p-1" size={24} />
+                            {error}
+                            <button onClick={fetchData} className="ml-auto underline">Try Again</button>
+                        </div>
+                    )}
                     {fetching ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <Loader2 className="animate-spin text-accent" size={48} />
