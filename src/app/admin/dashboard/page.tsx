@@ -265,57 +265,93 @@ export default function AdminDashboard() {
                     ) : (
                         <motion.div
                             key="enquiries"
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 1.02 }}
-                            className="bg-white dark:bg-slate-900 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -30 }}
+                            className="space-y-6"
                         >
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-slate-50 dark:bg-slate-800/50">
-                                            <th className="px-10 py-6 font-black text-xs uppercase tracking-widest text-slate-500 border-b border-slate-100 dark:border-slate-800">Submission Date</th>
-                                            <th className="px-10 py-6 font-black text-xs uppercase tracking-widest text-slate-500 border-b border-slate-100 dark:border-slate-800">Buyer Profile</th>
-                                            <th className="px-10 py-6 font-black text-xs uppercase tracking-widest text-slate-500 border-b border-slate-100 dark:border-slate-800">Target Property</th>
-                                            <th className="px-10 py-6 font-black text-xs uppercase tracking-widest text-slate-500 border-b border-slate-100 dark:border-slate-800">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                                        {enquiries.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={4} className="px-10 py-20 text-center text-slate-400 font-bold text-xl">
-                                                    No buyer enquiries yet.
-                                                </td>
-                                            </tr>
-                                        ) : enquiries.map((enq) => (
-                                            <tr key={enq.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                                                <td className="px-10 py-8 text-sm text-slate-500 font-medium">
-                                                    {new Date(enq.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                </td>
-                                                <td className="px-10 py-8">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-lg font-black text-slate-900 dark:text-white capitalize">{enq.name}</span>
-                                                        <span className="text-sm font-bold text-accent tracking-tighter">{enq.phone}</span>
+                            {enquiries.length === 0 ? (
+                                <div className="py-24 text-center bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800 shadow-sm">
+                                    <MessageSquare className="mx-auto text-slate-200 mb-6" size={64} />
+                                    <p className="text-slate-400 text-2xl font-bold">No buyer enquiries present.</p>
+                                    <p className="text-slate-500 mt-2">Marketing campaigns may help attract potential buyers.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-6">
+                                    {enquiries.map((enq) => (
+                                        <motion.div
+                                            key={enq.id}
+                                            layout
+                                            className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all duration-500 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center gap-8 relative group"
+                                        >
+                                            <div className="absolute top-0 left-0 w-2 h-full bg-accent opacity-0 group-hover:opacity-100 transition-opacity rounded-l-[2.5rem]" />
+
+                                            <div className="flex-shrink-0 w-full md:w-48 text-center md:text-left">
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Received On</p>
+                                                <p className="text-lg font-black text-slate-900 dark:text-white">
+                                                    {new Date(enq.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                                </p>
+                                                <p className="text-xs font-bold text-slate-400">
+                                                    {new Date(enq.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex-grow w-full">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                                                                <Search size={14} />
+                                                            </div>
+                                                            <h3 className="text-xl font-black text-slate-900 dark:text-white capitalize">{enq.name}</h3>
+                                                        </div>
+                                                        <p className="text-accent font-black tracking-wider text-sm">{enq.phone}</p>
                                                     </div>
-                                                </td>
-                                                <td className="px-10 py-8">
-                                                    <div className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl inline-block">
-                                                        <span className="font-bold text-slate-700 dark:text-slate-300">{enq.properties?.title || "Unknown Property"}</span>
+
+                                                    <div className="px-5 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Inquiry For</span>
+                                                        <span className="font-bold text-slate-700 dark:text-slate-300">
+                                                            {enq.properties?.title || "Direct Website"}
+                                                        </span>
                                                     </div>
-                                                </td>
-                                                <td className="px-10 py-8">
-                                                    <button
-                                                        onClick={() => alert(`Message from ${enq.name}:\n\n"${enq.message}"`)}
-                                                        className="px-6 py-3 bg-accent text-white rounded-xl text-xs font-black shadow-lg shadow-accent/20 hover:scale-105 transition-all active:scale-95"
-                                                    >
-                                                        VIEW MESSAGE
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+
+                                                <div className="mt-6 p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100/50 dark:border-slate-800/50 relative">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-accent mb-2 block">Message / Mass</span>
+                                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium italic">
+                                                        "{enq.message}"
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto">
+                                                <button
+                                                    onClick={() => window.open(`tel:${enq.phone}`)}
+                                                    className="flex-grow md:flex-grow-0 p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all duration-300"
+                                                    title="Call Buyer"
+                                                >
+                                                    <Phone size={20} className="mx-auto" />
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm("Permanently delete this enquiry?")) {
+                                                            const { deleteEnquiry } = await import("@/app/actions/enquiry");
+                                                            setLoading(true);
+                                                            const res = await deleteEnquiry(enq.id);
+                                                            if (res.success) fetchData();
+                                                            setLoading(false);
+                                                        }
+                                                    }}
+                                                    className="flex-grow md:flex-grow-0 p-4 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all duration-300"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={20} className="mx-auto" />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>

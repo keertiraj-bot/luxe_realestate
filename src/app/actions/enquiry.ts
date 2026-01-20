@@ -91,3 +91,20 @@ export async function getEnquiries() {
     console.log(`Fetched ${data?.length || 0} enquiries`);
     return data;
 }
+
+export async function deleteEnquiry(id: string) {
+    const supabase = getSupabaseClient();
+
+    const { error } = await supabase
+        .from("buyer_enquiries")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        console.error("Delete Enquiry Error:", error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+}
