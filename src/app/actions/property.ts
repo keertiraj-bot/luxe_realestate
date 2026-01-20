@@ -30,6 +30,20 @@ function getSupabaseClient() {
     );
 }
 
+export async function getProperties() {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Fetch Properties Error:", error);
+        return [];
+    }
+    return data;
+}
+
 export async function createProperty(formData: FormData) {
     const supabase = getSupabaseClient();
 
@@ -39,18 +53,45 @@ export async function createProperty(formData: FormData) {
     const type = formData.get("type") as string;
     const description = formData.get("description") as string;
     const area = formData.get("area") as string;
-    const amenities = (formData.get("amenities") as string).split(",").map(s => s.trim());
-
-    // Note: Handling images would require a storage bucket upload session here.
-    // For simplicity in this demo, we'll store URLs or placeholders.
+    const amenities = (formData.get("amenities") as string || "").split(",").map(s => s.trim());
 
     const { data, error } = await supabase.from("properties").insert([
         { title, price, location, type, description, area, amenities }
     ]);
 
-    if (error) throw error;
+    if (error) {
+        console.error("Create Property Error:", error);
+        return { success: false, error: error.message };
+    }
 
     revalidatePath("/properties");
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+}
+
+export async function updateProperty(id: string, formData: FormData) {
+    const supabase = getSupabaseClient();
+
+    const title = formData.get("title") as string;
+    const price = Number(formData.get("price"));
+    const location = formData.get("location") as string;
+    const type = formData.get("type") as string;
+    const description = formData.get("description") as string;
+    const area = formData.get("area") as string;
+    const amenities = (formData.get("amenities") as string || "").split(",").map(s => s.trim());
+
+    const { error } = await supabase
+        .from("properties")
+        .update({ title, price, location, type, description, area, amenities })
+        .eq("id", id);
+
+    if (error) {
+        console.error("Update Property Error:", error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${id}`);
     revalidatePath("/admin/dashboard");
     return { success: true };
 }
@@ -59,7 +100,10 @@ export async function deleteProperty(id: string) {
     const supabase = getSupabaseClient();
 
     const { error } = await supabase.from("properties").delete().eq("id", id);
-    if (error) throw error;
+    if (error) {
+        console.error("Delete Property Error:", error);
+        return { success: false, error: error.message };
+    }
 
     revalidatePath("/properties");
     revalidatePath("/admin/dashboard");
