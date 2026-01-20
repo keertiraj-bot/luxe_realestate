@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { ArrowRight, CheckCircle, ShieldCheck, Star, Users, MessageCircle, Home as HomeIcon } from "lucide-react";
+import { ArrowRight, CheckCircle, ShieldCheck, Star, Users, MessageCircle, Home as HomeIcon, Plus } from "lucide-react";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import PropertyCard from "@/components/PropertyCard";
 
@@ -41,6 +41,8 @@ const featuredProperties = [
     }
 ];
 
+import { trackEvent } from "@/lib/analytics";
+
 export default function Home() {
     const heroRef = useRef(null);
     const { scrollYProgress } = useScroll();
@@ -73,10 +75,14 @@ export default function Home() {
     const [selectedType, setSelectedType] = useState("Any");
 
     const handleSearch = () => {
+        trackEvent("hero_search_click", {
+            location: selectedLocation,
+            budget: selectedBudget,
+            type: selectedType
+        });
         const params = new URLSearchParams();
         if (selectedLocation !== "Any") params.set("location", selectedLocation);
         if (selectedType !== "Any") params.set("type", selectedType);
-        // Budget logic would need mapping but for now we navigate
         window.location.href = `/properties?${params.toString()}`;
     };
 
@@ -394,21 +400,90 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* How It Works - The Journey (P2.1) */}
+            <section className="py-32 bg-white dark:bg-slate-950">
+                <div className="container mx-auto px-6">
+                    <div className="text-center mb-24">
+                        <h2 className="text-accent font-black mb-4 uppercase tracking-[0.3em] text-xs">The Journey</h2>
+                        <h3 className="text-5xl md:text-7xl font-black tracking-tighter">HOW BUYING <span className="text-slate-200 dark:text-slate-800">WORKS</span></h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative">
+                        {/* Connecting Line (Desktop) */}
+                        <div className="hidden lg:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 dark:bg-slate-900 -translate-y-1/2 z-0" />
+
+                        {[
+                            { step: "01", title: "Curation", desc: "Select from our verified, high-yield collection." },
+                            { step: "02", title: "Inspection", desc: "Private tour with our technical audit experts." },
+                            { step: "03", title: "Shielding", desc: "Title verification and price shielding by legal." },
+                            { step: "04", title: "Handover", desc: "Smooth documentation and elite handover." }
+                        ].map((item, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.2 }}
+                                className="relative z-10 p-10 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-xl group hover:border-accent transition-all"
+                            >
+                                <div className="text-4xl font-black text-accent/20 group-hover:text-accent transition-colors mb-6">{item.step}</div>
+                                <h4 className="text-2xl font-black mb-4">{item.title}</h4>
+                                <p className="text-slate-500 font-medium">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQs - Content Depth (P2.1) */}
+            <section className="py-32 bg-slate-50 dark:bg-slate-900/50">
+                <div className="container mx-auto px-6 max-w-4xl">
+                    <div className="text-center mb-20">
+                        <h3 className="text-4xl md:text-6xl font-black tracking-tighter">COMMON <span className="text-accent">QUESTIONS</span></h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        {[
+                            { q: "Are all properties RERA certified?", a: "Yes, every primary property we list is strictly checked for RERA compliance and clear approvals." },
+                            { q: "Do you charge fees from the buyer?", a: "Our premium buyer-representation packages ensure you get expert advice, legal shielding, and the best price. Contact us for detailed plans." },
+                            { q: "How long is the legal verification process?", a: "Typically, our in-house legal team completes a thorough title search and background check within 3-5 working days." }
+                        ].map((faq, i) => (
+                            <details key={i} className="group p-8 bg-white dark:bg-slate-950 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 cursor-pointer shadow-sm">
+                                <summary className="list-none flex justify-between items-center text-xl font-black tracking-tight">
+                                    {faq.q}
+                                    <span className="text-accent group-open:rotate-45 transition-transform"><Plus size={24} /></span>
+                                </summary>
+                                <p className="mt-6 text-slate-500 font-medium leading-relaxed">
+                                    {faq.a}
+                                </p>
+                            </details>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-32 reveal-section">
                 <div className="container mx-auto px-6">
                     <div className="relative rounded-[3rem] bg-accent p-12 md:p-24 overflow-hidden">
                         <div className="absolute top-0 right-0 w-1/3 h-full bg-white/10 -skew-x-12 translate-x-1/2" />
                         <div className="relative z-10 max-w-3xl">
-                            <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to Find Your <br /> Perfect Home?</h2>
-                            <p className="text-white/80 text-xl mb-12">
+                            <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-[1.1]">Ready to Find Your <br /> Perfect Home?</h2>
+                            <p className="text-white/80 text-xl mb-12 font-medium">
                                 Join thousands of happy homeowners who found their sanctuary through Luxe Realty.
                             </p>
                             <div className="flex flex-wrap gap-6">
-                                <Link href="/contact" className="px-10 py-5 bg-white text-accent rounded-full font-bold text-lg shadow-xl hover:bg-slate-50 transition-all">
+                                <Link
+                                    href="/contact"
+                                    aria-label="Directly contact support"
+                                    className="px-10 py-5 bg-white text-accent rounded-full font-black text-lg shadow-2xl shadow-accent/20 hover:scale-[1.05] active:scale-95 transition-all"
+                                >
                                     Contact Support
                                 </Link>
-                                <Link href="/properties" className="px-10 py-5 bg-primary text-white rounded-full font-bold text-lg shadow-xl hover:bg-opacity-90 transition-all">
+                                <Link
+                                    href="/properties"
+                                    aria-label="Browse full property catalog"
+                                    className="px-10 py-5 bg-slate-950 text-white rounded-full font-black text-lg shadow-2xl shadow-slate-950/20 hover:scale-[1.05] active:scale-95 transition-all"
+                                >
                                     Browse Catalog
                                 </Link>
                             </div>

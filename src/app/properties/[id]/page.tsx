@@ -20,7 +20,9 @@ import {
 import { formatPrice } from "@/lib/utils";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Map from "@/components/Map";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { submitEnquiry } from "@/app/actions/enquiry";
+import { trackEvent } from "@/lib/analytics";
 
 // Mock function to simulate fetching - in reality this would fetch from Supabase
 const getProperty = (id: string) => {
@@ -53,6 +55,14 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
 
+    useEffect(() => {
+        if (!property) return;
+        const saved = localStorage.getItem("luxe_recent");
+        let ids: string[] = saved ? JSON.parse(saved) : [];
+        ids = [property.id, ...ids.filter(id => id !== property.id)].slice(0, 10);
+        localStorage.setItem("luxe_recent", JSON.stringify(ids));
+    }, [property]);
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
@@ -64,6 +74,11 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
         try {
             const res = await submitEnquiry(formData);
             if (res.success) {
+                trackEvent("property_enquiry_submit", {
+                    property_id: property.id,
+                    property_title: property.title,
+                    service: formData.get("service")?.toString()
+                });
                 setSuccess(true);
                 const form = e.target as HTMLFormElement;
                 form.reset();
@@ -89,14 +104,12 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Main Content */}
+                    {/* Left Column: Images & Info */}
                     <div className="lg:col-span-2 space-y-12">
-                        {/* Gallery */}
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <motion.div
-                                key={activeImage}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
                                 className="relative h-[400px] md:h-[600px] rounded-[2.5rem] overflow-hidden group shadow-2xl"
                             >
                                 <Image
@@ -280,6 +293,7 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                     </div>
                 </div>
             </div>
+            <RecentlyViewed />
         </div>
     );
 }

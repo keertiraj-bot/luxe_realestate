@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, MapPin, Phone, Send, Loader2, CheckCircle2 } from "lucide-react";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { submitEnquiry } from "@/app/actions/enquiry";
+import { trackEvent } from "@/lib/analytics";
 
 export default function ContactPage() {
     const [loading, setLoading] = useState(false);
@@ -20,6 +21,10 @@ export default function ContactPage() {
         try {
             const res = await submitEnquiry(formData);
             if (res.success) {
+                trackEvent("contact_form_submit", {
+                    city: formData.get("city")?.toString(),
+                    service: formData.get("service")?.toString()
+                });
                 setSuccess(true);
                 const form = e.target as HTMLFormElement;
                 form.reset();
@@ -66,7 +71,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-slate-400 uppercase">Email us</p>
-                                            <p className="font-bold">support@luxerealty.com</p>
+                                            <p className="font-bold">contact@luxerealty.com</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -75,7 +80,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-slate-400 uppercase">Visit us</p>
-                                            <p className="font-bold">123 Realty Tower, BKC, Mumbai</p>
+                                            <p className="font-bold">Worli, Mumbai, Maharashtra</p>
                                         </div>
                                     </div>
                                 </div>
@@ -108,79 +113,97 @@ export default function ContactPage() {
                                         <p className="text-slate-500 mb-8 text-lg">Thank you for your interest. Our executive will call you shortly.</p>
                                         <button
                                             onClick={() => setSuccess(false)}
-                                            className="px-8 py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/20"
+                                            className="text-accent font-bold hover:underline"
                                         >
-                                            Send Another
+                                            Send another message
                                         </button>
                                     </motion.div>
-                                ) : null}
-                            </AnimatePresence>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-6">
+                                        <div className="grid grid-cols-1 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-slate-400 uppercase ml-2">Name</label>
+                                                <input
+                                                    name="name"
+                                                    required
+                                                    type="text"
+                                                    placeholder="Enter your name"
+                                                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-slate-400 uppercase ml-2">Email</label>
+                                                    <input
+                                                        name="email"
+                                                        required
+                                                        type="email"
+                                                        placeholder="Email address"
+                                                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-slate-400 uppercase ml-2">Phone</label>
+                                                    <input
+                                                        name="phone"
+                                                        required
+                                                        type="tel"
+                                                        placeholder="Contact number"
+                                                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-slate-400 uppercase ml-2">Preferred City</label>
+                                                    <input
+                                                        name="city"
+                                                        required
+                                                        type="text"
+                                                        placeholder="e.g. Mumbai"
+                                                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-bold text-slate-400 uppercase ml-2">Service Required</label>
+                                                    <select
+                                                        name="service"
+                                                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold appearance-none"
+                                                    >
+                                                        <option value="callback">Request Callback</option>
+                                                        <option value="sitevisit">Schedule Site Visit</option>
+                                                        <option value="consultation">Luxury Consultation</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-slate-400 uppercase ml-2">Message</label>
+                                                <textarea
+                                                    name="message"
+                                                    required
+                                                    rows={4}
+                                                    placeholder="How can we help you?"
+                                                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-accent transition-all font-bold resize-none"
+                                                ></textarea>
+                                            </div>
+                                        </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                {error && (
-                                    <div className="p-4 bg-red-100 text-red-600 rounded-xl text-sm font-black uppercase tracking-widest border border-red-200">
-                                        {error}
-                                    </div>
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="w-full py-5 bg-accent text-white rounded-[2rem] font-black text-lg shadow-xl shadow-accent/20 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                                        >
+                                            {loading ? (
+                                                <Loader2 className="animate-spin" size={24} />
+                                            ) : (
+                                                <>
+                                                    Send Message <Send size={20} />
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
                                 )}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Full Name</label>
-                                        <input name="name" required type="text" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all font-bold" placeholder="Vikram Malhotra" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Phone Number</label>
-                                        <input name="phone" required type="tel" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all font-bold" placeholder="+91 99999 99999" />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">City / Area</label>
-                                        <input name="city" required type="text" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all font-bold" placeholder="Bandra, Mumbai" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Planned Budget</label>
-                                        <select name="budget" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all font-bold appearance-none">
-                                            <option>₹1 Cr - ₹5 Cr</option>
-                                            <option>₹5 Cr - ₹10 Cr</option>
-                                            <option>₹10 Cr+</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Service Required</label>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <label className="cursor-pointer">
-                                            <input type="radio" name="service" value="callback" defaultChecked className="hidden peer" />
-                                            <div className="py-4 text-center rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 peer-checked:bg-accent peer-checked:text-white peer-checked:border-accent transition-all font-bold text-sm">
-                                                Request Callback
-                                            </div>
-                                        </label>
-                                        <label className="cursor-pointer">
-                                            <input type="radio" name="service" value="sitevisit" className="hidden peer" />
-                                            <div className="py-4 text-center rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 peer-checked:bg-accent peer-checked:text-white peer-checked:border-accent transition-all font-bold text-sm">
-                                                Schedule Site Visit
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Your Requirements</label>
-                                    <textarea name="message" required rows={4} className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all resize-none font-bold" placeholder="Specific requirements (e.g. Sea View, Vastu Compliant)..."></textarea>
-                                </div>
-
-                                <button
-                                    disabled={loading}
-                                    type="submit"
-                                    className="w-full py-6 bg-accent text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-accent/40 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                                >
-                                    {loading ? <Loader2 className="animate-spin" /> : <Send size={24} />}
-                                    {loading ? "Processing..." : "Submit Enquiry"}
-                                </button>
-                                <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Response time typically under 15 minutes</p>
-                            </form>
+                            </AnimatePresence>
                         </motion.div>
                     </div>
                 </div>
