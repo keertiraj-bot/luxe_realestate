@@ -65,11 +65,13 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
             const res = await submitEnquiry(formData);
             if (res.success) {
                 setSuccess(true);
-                e.currentTarget.reset();
+                const form = e.target as HTMLFormElement;
+                form.reset();
             } else {
                 setError(res.error || "Failed to send enquiry.");
             }
         } catch (err) {
+            console.error("Property enquiry error:", err);
             setError("Something went wrong");
         } finally {
             setLoading(false);

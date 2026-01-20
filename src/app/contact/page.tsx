@@ -21,11 +21,13 @@ export default function ContactPage() {
             const res = await submitEnquiry(formData);
             if (res.success) {
                 setSuccess(true);
-                e.currentTarget.reset();
+                const form = e.target as HTMLFormElement;
+                form.reset();
             } else {
                 setError(res.error || "Failed to send message. Please try again.");
             }
         } catch (err) {
+            console.error("Enquiry submission error:", err);
             setError("Something went wrong. Please try again later.");
         } finally {
             setLoading(false);

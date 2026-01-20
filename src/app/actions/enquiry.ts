@@ -31,33 +31,44 @@ function getSupabaseClient() {
 }
 
 export async function submitEnquiry(formData: FormData) {
-    const supabase = getSupabaseClient();
+    try {
+        const supabase = getSupabaseClient();
 
-    const property_id = formData.get("property_id") as string;
-    const name = formData.get("name") as string;
-    const phone = formData.get("phone") as string;
-    const message = formData.get("message") as string;
+        const property_id = formData.get("property_id") as string;
+        const name = formData.get("name") as string;
+        const phone = formData.get("phone") as string;
+        const message = formData.get("message") as string;
 
-    // Log the data we are trying to insert
-    console.log("Submitting enquiry:", { property_id, name, phone, message });
+        // Log the data we are trying to insert
+        console.log("Submitting enquiry:", { property_id, name, phone, message });
 
-    const { data, error } = await supabase.from("buyer_enquiries").insert([
-        {
-            property_id: property_id || null,
-            name,
-            phone,
-            message
+        const { error } = await supabase.from("buyer_enquiries").insert([
+            {
+                property_id: (property_id && property_id !== "undefined") ? property_id : null,
+                name,
+                phone,
+                message
+            }
+        ]);
+
+        if (error) {
+            console.error("Enquiry Insertion Error:", error);
+            return { success: false, error: error.message };
         }
-    ]).select();
 
-    if (error) {
-        console.error("Enquiry Insertion Error:", error);
-        return { success: false, error: error.message };
+        console.log("Enquiry submitted successfully");
+
+        try {
+            revalidatePath("/admin/dashboard");
+        } catch (revalidateError) {
+            console.error("Revalidation Error (non-critical):", revalidateError);
+        }
+
+        return { success: true };
+    } catch (err: any) {
+        console.error("Unexpected Enquiry Error:", err);
+        return { success: false, error: err.message || "Something went wrong on the server." };
     }
-
-    console.log("Enquiry submitted successfully:", data);
-    revalidatePath("/admin/dashboard");
-    return { success: true };
 }
 
 export async function getEnquiries() {
