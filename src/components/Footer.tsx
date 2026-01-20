@@ -1,60 +1,116 @@
+"use client";
+
 import Link from "next/link";
-import { Home, Mail, MapPin, Phone } from "lucide-react";
+import { Home, Mail, MapPin, Phone, MessageSquare, Instagram, Facebook, Twitter, ShieldCheck, Star } from "lucide-react";
+
+const FooterLinks = {
+    Buy: [
+        { name: "All Properties", href: "/properties" },
+        { name: "Luxury Villas", href: "/properties?type=Villa" },
+        { name: "Elite Penthouses", href: "/properties?type=Penthouse" },
+        { name: "Verified Plots", href: "/properties?type=Plot" },
+    ],
+    Company: [
+        { name: "About Us", href: "/about" },
+        { name: "Why Us", href: "/#why-us" },
+        { name: "Testimonials", href: "/#testimonials" },
+        { name: "Contact", href: "/contact" },
+    ],
+    Resources: [
+        { name: "Buyer Guide", href: "/guides" },
+        { name: "Legal Help", href: "/legal" },
+        { name: "RERA Status", href: "/rera" },
+        { name: "Admin Portal", href: "/admin/login" },
+    ]
+};
 
 export default function Footer() {
     return (
-        <footer className="bg-primary text-white pt-20 pb-10">
-            <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
-                <div className="space-y-6">
-                    <div className="flex items-center gap-2">
-                        <Home className="text-accent" size={28} />
-                        <span className="text-2xl font-bold tracking-tighter">LUXE REALTY</span>
+        <footer className="bg-slate-950 text-white pt-32 pb-12 border-t border-slate-900 overflow-hidden">
+            <div className="container mx-auto px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
+                    <div className="max-w-xl space-y-12">
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <div className="p-3 bg-accent rounded-2xl group-hover:rotate-12 transition-transform shadow-2xl shadow-accent/20">
+                                <Home className="text-white" size={32} />
+                            </div>
+                            <span className="text-4xl font-black tracking-tighter">LUXE<span className="text-accent">REALTY</span></span>
+                        </Link>
+
+                        <p className="text-2xl font-medium text-slate-400 leading-relaxed tracking-tight">
+                            Crafting frictionless real estate experiences for the world's most <span className="text-white">discerning buyers.</span> Only verified, high-yield assets.
+                        </p>
+
+                        <div className="flex gap-4">
+                            {[Instagram, Facebook, Twitter, MessageSquare].map((Icon, i) => (
+                                <Link key={i} href="#" className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center hover:bg-accent transition-all duration-500 border border-slate-800">
+                                    <Icon size={24} />
+                                </Link>
+                            ))}
+                        </div>
                     </div>
-                    <p className="text-slate-400 leading-relaxed">
-                        Finding your perfect home shouldn't be hard. We connect buyers with premium, verified properties across the best locations.
-                    </p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+                        {Object.entries(FooterLinks).map(([title, links]) => (
+                            <div key={title}>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-accent mb-8">{title}</h4>
+                                <ul className="space-y-4">
+                                    {links.map((link) => (
+                                        <li key={link.name}>
+                                            <Link href={link.href} className="text-slate-400 font-bold hover:text-white transition-colors">
+                                                {link.name}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div>
-                    <h4 className="text-lg font-bold mb-6">Quick Links</h4>
-                    <ul className="space-y-4 text-slate-400">
-                        <li><Link href="/" className="hover:text-accent transition-colors">Home</Link></li>
-                        <li><Link href="/properties" className="hover:text-accent transition-colors">Featured Properties</Link></li>
-                        <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
-                        <li><Link href="/admin/login" className="hover:text-accent transition-colors">Admin Login</Link></li>
-                    </ul>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-12 border-y border-slate-900 items-center">
+                    <div className="flex items-center gap-4 group cursor-pointer">
+                        <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                            <Phone size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Private Line</p>
+                            <p className="font-black text-lg">+91 123 456 7890</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 group cursor-pointer">
+                        <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                            <Mail size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Expert Support</p>
+                            <p className="font-black text-lg">hello@luxerealty.com</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 group cursor-pointer">
+                        <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                            <MapPin size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">HQ Office</p>
+                            <p className="font-black text-lg">BKC, Mumbai - 400051</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <h4 className="text-lg font-bold mb-6">Locations</h4>
-                    <ul className="space-y-4 text-slate-400">
-                        <li>Mumbai, Maharashtra</li>
-                        <li>Bangalore, Karnataka</li>
-                        <li>Pune, Maharashtra</li>
-                        <li>Delhi NCR</li>
-                    </ul>
-                </div>
+                <div className="mt-12 flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="flex items-center gap-8 opacity-40">
+                        <div className="flex items-center gap-2 font-black text-xs uppercase tracking-[0.2em]"><ShieldCheck size={16} /> RERA Certified</div>
+                        <div className="flex items-center gap-2 font-black text-xs uppercase tracking-[0.2em]"><Star size={16} /> 5-Star Rated</div>
+                    </div>
 
-                <div>
-                    <h4 className="text-lg font-bold mb-6">Contact</h4>
-                    <ul className="space-y-4 text-slate-400">
-                        <li className="flex items-center gap-2">
-                            <Phone size={18} className="text-accent" />
-                            <span>+91 123 456 7890</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <Mail size={18} className="text-accent" />
-                            <span>hello@luxerealty.com</span>
-                        </li>
-                        <li className="flex items-center gap-2 leading-relaxed">
-                            <MapPin size={18} className="text-accent flex-shrink-0" />
-                            <span>123 Realty Tower, BKC, Mumbai - 400051</span>
-                        </li>
-                    </ul>
+                    <div className="text-slate-500 text-[10px] font-black uppercase tracking-widest text-center md:text-right">
+                        &copy; {new Date().getFullYear()} LUXE REALTY. ALL RIGHTS RESERVED. <br className="md:hidden" />
+                        <span className="text-slate-400">DESIGN BY KEERTI SINH</span>
+                    </div>
                 </div>
-            </div>
-            <div className="container mx-auto px-6 mt-20 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
-                &copy; {new Date().getFullYear()} Luxe Realty. All rights reserved. Design by KEERTI SINH
             </div>
         </footer>
     );

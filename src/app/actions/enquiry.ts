@@ -8,6 +8,9 @@ export async function submitEnquiry(formData: FormData) {
         const phone = formData.get("phone")?.toString();
         const message = formData.get("message")?.toString();
         const property_id = formData.get("property_id")?.toString();
+        const city = formData.get("city")?.toString();
+        const budget = formData.get("budget")?.toString();
+        const service = formData.get("service")?.toString();
 
         if (!name || !phone || !message) {
             return { success: false, error: "Missing required fields" };
@@ -18,8 +21,12 @@ export async function submitEnquiry(formData: FormData) {
             {
                 name,
                 phone,
-                message,
+                message: `${message}${city ? ` | City: ${city}` : ""}${budget ? ` | Budget: ${budget}` : ""}${service ? ` | Service: ${service}` : ""}`,
                 property_id: (property_id && property_id !== "undefined") ? property_id : null,
+                // Add these if you have the columns:
+                // city,
+                // budget,
+                // service
             }
         ]);
 
