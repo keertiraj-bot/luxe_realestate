@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     MapPin,
     Maximize,
@@ -14,13 +14,15 @@ import {
     Share2,
     Heart,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Map from "@/components/Map";
+import { submitEnquiry } from "@/app/actions/enquiry";
 
-// Mock function to simulate fetching
+// Mock function to simulate fetching - in reality this would fetch from Supabase
 const getProperty = (id: string) => {
     return {
         id,
@@ -47,11 +49,37 @@ const getProperty = (id: string) => {
 export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
     const property = getProperty(params.id);
     const [activeImage, setActiveImage] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+
+        const formData = new FormData(e.currentTarget);
+        formData.append("property_id", params.id);
+
+        try {
+            const res = await submitEnquiry(formData);
+            if (res.success) {
+                setSuccess(true);
+                e.currentTarget.reset();
+            } else {
+                setError(res.error || "Failed to send enquiry.");
+            }
+        } catch (err) {
+            setError("Something went wrong");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="pt-24 pb-20">
             <div className="container mx-auto px-6">
-                {/* Navigation Breadcrumb - Simplified */}
+                {/* Navigation Breadcrumb */}
                 <div className="mb-8 flex items-center gap-4 text-slate-500">
                     <span className="hover:text-accent cursor-pointer transition-colors" onClick={() => window.history.back()}>Properties</span>
                     <span>/</span>
@@ -162,7 +190,29 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                     {/* Sidebar - Enquiry Form */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-32 space-y-8">
-                            <div className="p-8 glass dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-white dark:border-slate-800">
+                            <div className="p-8 glass dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-white dark:border-slate-800 relative overflow-hidden">
+                                <AnimatePresence>
+                                    {success ? (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="absolute inset-0 z-10 bg-white dark:bg-slate-900 flex flex-col items-center justify-center text-center p-8"
+                                        >
+                                            <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mb-4">
+                                                <CheckCircle2 size={32} />
+                                            </div>
+                                            <h3 className="text-xl font-black mb-2">Request Received!</h3>
+                                            <p className="text-slate-500 text-sm mb-6">Our property expert will contact you within 24 hours.</p>
+                                            <button
+                                                onClick={() => setSuccess(false)}
+                                                className="text-accent font-bold text-sm underline"
+                                            >
+                                                Send Another
+                                            </button>
+                                        </motion.div>
+                                    ) : null}
+                                </AnimatePresence>
+
                                 <h3 className="text-2xl font-black mb-6">Interested?</h3>
                                 <div className="space-y-6">
                                     <WhatsAppButton
@@ -178,18 +228,24 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                                         <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
                                     </div>
 
-                                    <form className="space-y-4">
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        {error && <p className="text-red-500 text-xs font-bold">{error}</p>}
                                         <div>
-                                            <input type="text" placeholder="Your Name" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
+                                            <input name="name" required type="text" placeholder="Your Name" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
                                         </div>
                                         <div>
-                                            <input type="tel" placeholder="Phone Number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
+                                            <input name="phone" required type="tel" placeholder="Phone Number" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all" />
                                         </div>
                                         <div>
-                                            <textarea rows={4} placeholder="Your Message" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all resize-none"></textarea>
+                                            <textarea name="message" required rows={4} placeholder="Your Message" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-none outline-none focus:ring-2 focus:ring-accent transition-all resize-none"></textarea>
                                         </div>
-                                        <button className="w-full py-5 bg-primary text-white rounded-2xl font-bold shadow-xl hover:bg-opacity-90 transition-all">
-                                            Submit Enquiry
+                                        <button
+                                            disabled={loading}
+                                            type="submit"
+                                            className="w-full py-5 bg-primary text-white rounded-2xl font-bold shadow-xl hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {loading ? <Loader2 className="animate-spin" /> : null}
+                                            {loading ? "Submitting..." : "Submit Enquiry"}
                                         </button>
                                     </form>
                                 </div>
@@ -200,7 +256,7 @@ export default function PropertyDetailsPage({ params }: { params: { id: string }
                                 <div className="p-3 bg-emerald-500 text-white rounded-2xl">
                                     <Tag size={20} />
                                 </div>
-                                <div>
+                                <div className="flex-grow">
                                     <h4 className="font-bold text-emerald-900 dark:text-emerald-400 text-lg">Best Price Guarantee</h4>
                                     <p className="text-emerald-700/70 dark:text-emerald-500 text-sm">Found a better deal? We'll match it and give you a gift voucher.</p>
                                 </div>
